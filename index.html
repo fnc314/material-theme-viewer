@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nothing Found</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 0;
+      background-color: #FCF8F8;
+      margin: 0;
+      color: #1C1B1B;
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr;
+      grid-template-areas:
+      "header"
+      "contents";
+    }
+    
+    .main {
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr;
+      perspective: 1000px;
+    }
+    
+    .main-header {
+      position: sticky;
+      top: 0;
+      grid-area: "header";
+      grid-row: 1;
+      grid-column: 1;
+      z-index: 200;
+    }
+    
+    .nav {
+      padding: 0.25rem 0 1px 0;
+      background-color: #F1EDEC;
+      display: flex;
+      justify-content: center;
+    }
+    
+    .nav-list {
+      list-style: none; 
+      padding: 0;
+    }
+    
+    input[type="radio"] {
+      display: none;
+    }
+    
+    .tab {
+      display: inline;
+      padding: 1rem;
+    }
+    
+    .tab:has(input[type="radio"]) {
+      background: #E5E2E1;
+      color: #1C1B1B;
+      outline: 1px solid #1C1B1B;
+      border-top-right-radius: 5px;
+      border-top-left-radius: 5px;
+    }
+    
+    .tab:has(input[type="radio"]:checked) {
+      background: #BB3333;
+      color: #FFDCD9;
+      outline: 1px solid #FFDCD9;
+      border-top-right-radius: 10px;
+      border-top-left-radius: 10px;
+    }
+    
+    .tab-label {
+      cursor: pointer;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+    
+    .page-container {
+      padding: 1px 1rem 0 1rem;
+      display: none;
+      animation: tab-rotate-exit 0.4s ease-in-out forwards;
+      backface-visibility: hidden;
+      grid-area: "contents";
+      grid-row: 2;
+      grid-column: 1;
+    }
+    
+    .swatch {
+      border: 1px dashed #BB3333;
+      border-radius: 16px;
+      flex: 1 0 auto;
+    }
+    
+    body:has(.core-colors:checked) .core-colors-container {
+      display: flex;
+      animation: tab-rotate-enter 0.4s ease-in-out forwards;
+    }
+    body:has(.palettes:checked) .palettes-container {
+      display: flex;
+      animation: tab-rotate-enter 0.4s ease-in-out forwards;
+    }
+    body:has(.schemes:checked) .schemes-container {
+      display: flex;
+      animation: tab-rotate-enter 0.4s ease-in-out forwards;
+    }
+    
+    .heading {
+      text-align: center;
+      color: #444748;
+      margin: 0;
+    }
+    
+    h2.heading {
+      flex: 0 0 max-content;
+      padding-inline: 38vw;
+    }
+    
+    h3.heading {
+      flex: 0 0 max-content;
+      padding-inline: 18vw;
+      padding-block: 0.5rem;
+    }
+    
+    .heading-underline {
+      background-color: #E5E2E1;
+      border-bottom-right-radius: 16px;
+      border-bottom-left-radius: 16px;
+      border-bottom: 1px solid #444748;
+    }
+    
+    .row {
+      display: flex;
+      flex-direction: row; 
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+    
+    .table {
+      display: none;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.25rem;
+    }
+    
+    .paragraph {
+      text-align: center;
+      flex: 0 1 22%;
+      margin: 0;
+      padding: 1rem 0rem;
+    }
+    
+    @keyframes tab-change-enter {
+      0% {
+        opacity: 0;
+        display: none;
+        transform: translateX(-100vw);
+      }
+      100% {
+        opacity: 1;
+        display: flex;
+        transform: translateX(0) translateY(0);
+      }
+    }
+    
+    @keyframes tab-change-exit {
+      0% {
+        opacity: 1;
+        display: flex;
+        transform: translateX(0) translateY(0);
+      }
+      100% {
+        opacity: 0;
+        display: none;
+        transform: translateX(100vw) translateY(0);
+      }
+    }
+
+    @keyframes tab-rotate-enter {
+      0% {
+        transform: rotateY(-90deg);
+        opacity: 0;
+      }
+      100% {
+        transform: rotateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes tab-rotate-exit {
+      0% {
+        transform: rotateY(0);
+        opacity: 1;
+      }
+      100% {
+        transform: rotateY(90deg);
+        opacity: 0;
+      }
+    }
+  </style>
+  <script type="module" async>
+    const main = document.getElementById("main");
+    
+    const createTableColumn = (id) => {
+      const column = document.createElement("section");
+      column.classList.add("page-container", id, "table");
+      column.id = id;
+      return column;
+    };
+    
+    const createTableRow = (colorRole, colorValue) => {
+      const row = document.createElement("div");
+      row.classList.add("row");
+      const colorRoleElement = createParagraph(colorRole);
+      row.appendChild(colorRoleElement);
+      const colorRgbElement = createParagraph(colorValue);
+      colorRgbElement.style.flexBasis = "10%";
+      row.appendChild(colorRgbElement);
+      const colorSwatchElement = document.createElement("div");
+      colorSwatchElement.style.backgroundColor = colorValue;
+      colorSwatchElement.classList.add("swatch");
+      row.appendChild(colorSwatchElement);
+      return row;
+    };
+    
+    const createParagraph = (text) => {
+      const p = document.createElement("p");
+      p.textContent = text;
+      p.classList.add("paragraph");
+      return p;
+    };
+    
+    const createHeading = (text, id, isTertiary) => {
+      const container = document.createElement("div");
+      container.style.display = "flex";
+      container.style.justifyContent = "center";
+      container.style.alignItems = "center";
+      if (!isTertiary) {
+        container.classList.add("heading-underline");
+      } else {
+        container.style.zIndex = 100;
+        container.style.position = "sticky";
+        container.style.top = "55px";
+      }
+      const h = document.createElement(isTertiary ? "h3" : "h2");
+      h.textContent = text;
+      h.classList.add("heading");
+      if (isTertiary) {
+        h.classList.add("heading-underline");
+      }
+      h.id = id;
+      container.appendChild(h);
+      return container;
+    };
+    
+    const createPage = (id, name, colorMap) => {
+      const column = createTableColumn(`${id}-container`);
+      const heading = createHeading(name, `${id}-heading`, false);
+      column.appendChild(heading);
+      Object.entries(colorMap).forEach(([colorRole, colorValue]) => {
+        column.appendChild(createTableRow(colorRole, colorValue));
+      });
+      main.appendChild(column)
+    };
+    
+    const createPageWithSections = (id, name, sections) => {
+      const column = createTableColumn(`${id}-container`);
+      const heading = createHeading(name, `${id}-heading`, false);
+      column.appendChild(heading);
+      Object.entries(sections).forEach(([sectionName, colorMap]) => {
+        const section = document.createElement("section");
+        const sectionHeading = createHeading(sectionName, `${id}-${sectionName}-heading`, true);
+        section.appendChild(sectionHeading);
+        Object.entries(colorMap).forEach(([colorRole, colorValue]) => {
+          section.appendChild(createTableRow(colorRole, colorValue));
+        });
+        column.appendChild(section);
+      });
+      main.appendChild(column);
+    };
+    
+    const theme = await fetch('./material-theme.json').then(res => res.json());
+    
+    createPage("core-colors", "Core Colors", theme.coreColors);
+    createPageWithSections("palettes", "Palettes", theme.palettes);
+    createPageWithSections("schemes", "Schemes", theme.schemes);
+    
+  </script>
+</head>
+<body>
+  <header class="main-header">
+    <nav class="nav">
+      <ul class="nav-list">
+        <li class="tab" id="tab-core-colors">
+          <label class="tab-label" for="core-colors">
+            <input 
+              type="radio" 
+              name="content" 
+              id="core-colors"
+              class="core-colors"
+              checked
+              >
+            Core Colors
+          </label>
+        </li>
+        <li class="tab" id="tab-palettes">
+          <label class="tab-label" for="palettes">
+            <input 
+              type="radio" 
+              name="content" 
+              id="palettes"
+              class="palettes"
+              >
+            Palettes
+          </label>
+        </li>
+        <li class="tab" id="tab-schemes">
+          <label class="tab-label" for="schemes">
+            <input 
+              type="radio" 
+              name="content" 
+              id="schemes"
+              class="schemes"
+              >
+            Schemes
+          </label>
+        </li>
+      </ul>
+    </nav>
+  </header>
+  <main class="main" id="main" />
+</body>
