@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nothing Found</title>
+  <title>Material Theme Viewer</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -15,8 +15,8 @@
       grid-template-columns: 1fr;
       grid-template-rows: auto 1fr;
       grid-template-areas:
-      "header"
-      "contents";
+        "header"
+        "contents";
     }
     
     .main {
@@ -283,7 +283,7 @@
       main.appendChild(column);
     };
     
-    const theme = await fetch('./material-theme.json').then(res => res.json());
+    const theme = await fetch('./fnc314.github.io.json').then(res => res.json());
     
     createPage("core-colors", "Core Colors", theme.coreColors);
     createPageWithSections("palettes", "Palettes", theme.palettes);
